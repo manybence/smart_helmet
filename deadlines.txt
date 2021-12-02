@@ -1,0 +1,34 @@
+11. Nov: Full electronics + Dummy tests, Get helmet
+18. Nov: Controller firmware, First 3D design for controller
+25. Nov: Helmet firmware, Final 3D design for controller
+2.Dec: Application, Bluetooth connection, Build helmet
+9.Dec: Pitch day
+12.Dec: Report hand-in
+
+Maria: Build helmet, Presentation
+Ane: NeoPixel, Electronics schematics
+Fran: Soldering, Neopixel, 3D design
+Irene: Application
+Bence: Controller firmware, Helmet firmware, Bluetooth connection
+
+
+Controller firmware:
+Joystick - Done, soldered
+Send data - Done
+
+Helmet firmware:
+Light sensor - Done, soldered
+LED - Done, soldered
+Accelerometer - Done, soldered
+GPS - Done, soldered
+NeoPixel - Need to be connected
+Recieve data
+Connect to phone
+
+
+
+Device1 (helmet) : 84:CC:A8:2C:B0:3A
+Device2 (controller) : 24:6F:28:B4:55:36
+
+Bluetooth:
+https://circuitdigest.com/microcontroller-projects/esp32-ble-client-connecting-to-fitness-band-to-trigger-light

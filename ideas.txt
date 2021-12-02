@@ -1,0 +1,9 @@
+Cyclist:
+GPS
+Google maps
+Vibration
+Bluetooth earphone
+Emergency call
+Inflating airbag
+Smart lights
+Drunk sensor
