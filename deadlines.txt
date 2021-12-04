@@ -9,7 +9,7 @@ Maria: Build helmet, Presentation
 Ane: NeoPixel, Electronics schematics
 Fran: Soldering, Neopixel, 3D design
 Irene: Application
-Bence: Controller firmware, Helmet firmware, Bluetooth connection
+Bence: Helmet firmware - Merging
 
 
 Controller firmware:

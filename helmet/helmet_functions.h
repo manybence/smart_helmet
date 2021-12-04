@@ -1,8 +1,13 @@
+#ifndef HELMET_FUNCTIONS_H
+#define HELMET_FUNCTIONS_H
+
+#include "Arduino.h"
 #define PIN 6
 #define NUMPIXELS 144
 #define WIDTH 24
 #define HEIGHT 6
 #define DELAYVAL 500 // pausetime between pixels
+
 
 long right[];
 long left[];
@@ -14,3 +19,5 @@ void setArray(long pic[]);
 void setCircularArrayOffset(long pic[], int offset);
 void rightAnimation();
 void leftAnimation();
+
+#endif
