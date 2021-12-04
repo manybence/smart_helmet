@@ -12,7 +12,7 @@ BluetoothSerial SerialBT;
 #endif
 
 //NeoPixel settings
-#define PIN 6
+#define PIN 13
 #define NUMPIXELS 144
 #define WIDTH 24
 #define HEIGHT 6

@@ -1,15 +1,20 @@
-#include <BluetoothSerial.h>
 #include <Adafruit_NeoPixel.h>
-#include "esp_bt_device.h"
-BluetoothSerial SerialBT;
+#ifdef __AVR__
+ #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
+#endif
 
-//NeoPixel settings
-#define PIN 12
+#define PIN        13
 #define NUMPIXELS 144
 #define WIDTH 24
 #define HEIGHT 6
-#define DELAYVAL 500 // pausetime between pixels
+
+// When setting up the NeoPixel library, we tell it how many pixels,
+// and which pin to use to send signals. Note that for older NeoPixel
+// strips you might need to change the third parameter -- see the
+// strandtest example for more information on possible values.
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+#define DELAYVAL 500 // pausetime between pixels
 
 long right[] = { 0xff0000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000, 0x000000,
                0x000000, 0xff0000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000,
@@ -27,68 +32,35 @@ long left[] = { 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff
                        0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0xff0000,
 };
 
-uint8_t maxR = 20;
-uint8_t maxG = 20;
-uint8_t maxB = 20;
-
-
-bool found = false;
+uint8_t maxR = 255;
+uint8_t maxG = 255;
+uint8_t maxB = 255;
 
 void setup() {
-  Serial.begin(115200);
-  SerialBT.begin("Helmet", true);
-  Serial.println("Bluetooth Started! Ready to pair...");
-  const uint8_t* point = esp_bt_dev_get_address();
-  for (int i = 0; i< 6; i++){
-    char str[3];
-    sprintf(str, "%02X", (int)point[i]);
-    Serial.print(str);
+  // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
+  // Any other board, you can remove this part (but no harm leaving it):
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+  clock_prescale_set(clock_div_1);
+#endif
+  // END of Trinket-specific code.
 
-    if (i<5) Serial.print(":");
-  }
-  Serial.println();
+  pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
+  pixels.setBrightness(20);  // light intensity
 
-  SerialBT.connect("Controller");
+  pixels.clear(); // Set all pixel colors to 'off'
 
-   pixels.begin(); // Initialize NeoPixel strip object
-  pixels.setBrightness(20);
-  pixels.clear();   
+  //setPixel(2,0, 100, 0 ,0);
+  
+  //pixels.show();   // Send the updated pixel colors to the hardware.
+  
+  //setCircularArrayOffset(left, -30);
+  
   pixels.show();
-  //leftAnimation();
-
 }
 
 void loop() {
-
-  
-
-
-  if (SerialBT.connected()>0 && !found)
-  {
-    Serial.println("Bluetooth connected");
-    found = true;
-  }
-
-  if (SerialBT.connected()==0 && found)
-  {
-    Serial.println("Bluetooth disconnected");
-    found = false;
-  }
-
-
-  //Read bluetooth data from controller
-  if (SerialBT.available()) {
-    char c = SerialBT.read();
-    Serial.write(c);
-    if (c == 'L'){
-      leftAnimation();
-    }
-    if (c == 'R'){
-      rightAnimation();
-    }
-    //if (c == 'B') breakAnimation();      
-  }
-
+  rightAnimation();
+  leftAnimation();
 }
 
 void setPixel(uint8_t x, uint8_t y, uint8_t r,  uint8_t g,  uint8_t b){
@@ -143,8 +115,6 @@ void rightAnimation(){
     setCircularArrayOffset(right, + i);
     delay(50);
   }
-  pixels.clear();   
-  pixels.show();
 }
 
 
@@ -153,6 +123,4 @@ void leftAnimation(){
     setCircularArrayOffset(left, -i);
     delay(50);
   }
-  pixels.clear();   
-  pixels.show();
 }
