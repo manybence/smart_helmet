@@ -61,6 +61,9 @@ void setup() {
 void loop() {
   rightAnimation();
   leftAnimation();
+  brakeAnimation();
+  positionLedOn();
+  delay(2000);
 }
 
 void setPixel(uint8_t x, uint8_t y, uint8_t r,  uint8_t g,  uint8_t b){
@@ -115,6 +118,7 @@ void rightAnimation(){
     setCircularArrayOffset(right, + i);
     delay(50);
   }
+  pixels.clear();
 }
 
 
@@ -123,4 +127,23 @@ void leftAnimation(){
     setCircularArrayOffset(left, -i);
     delay(50);
   }
+  pixels.clear();
+}
+
+void brakeAnimation(){
+  for(int i = 0; i < NUMPIXELS; i++){
+    pixels.setPixelColor(i, pixels.Color(maxR*0.75, 0, 0));
+  }
+
+  pixels.show();
+  delay(500);
+  pixels.clear();
+}
+
+void positionLedOn(){
+  for(int i = 0; i < WIDTH; i++){
+    pixels.setPixelColor(i, pixels.Color(maxR*0.25, 0, 0));
+  }
+
+  pixels.show();
 }
