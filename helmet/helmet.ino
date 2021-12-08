@@ -35,9 +35,9 @@ long left[] = { 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff
                        0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0xff0000, 0x000000, 0x000000, 0x000000, 0x000000, 0xff0000, 0xff0000, 0xff0000, 0xff0000,
 };
 
-uint8_t maxR = 255;
-uint8_t maxG = 255;
-uint8_t maxB = 255;
+uint8_t maxR = 50;
+uint8_t maxG = 50;
+uint8_t maxB = 50;
 
 
 //GPS settings
@@ -47,10 +47,10 @@ TinyGPSPlus gps;
 SoftwareSerial ss(RXPin, TXPin);
 
 //Accelerometer settings
-int ADXL345 = 0x53; // The ADXL345 sensor I2C address
 float sum_acc;
-float accident_limit = 25;
+float accident_limit = 30;
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified();
+
 
 //Smart headlight settings
 #define ledPin 16
@@ -60,76 +60,103 @@ const int freq = 5000;
 const int resolution = 8;
 int output = 0;
 
-
+long t0;
+char c = ' ';
 
 
 void setup() {
+  Serial.begin(115200);
 
   //Start bluetooth module in master mode
   SerialBT.begin("Helmet", true);
   SerialBT.connect("Controller");
   Serial.println("Controller connected");
-  
+
   //Start smart light module
   ledcAttachPin(ledPin, ledChannel);
   ledcSetup(ledChannel, freq, resolution);
-  Serial.begin(115200);
-
+  
   //Start GPS module
   ss.begin(GPSBaud);
   Serial.println(F("Ublox Neo-7N GPS Module Test"));
-
 
   //Start accelerometer module
   if(!accel.begin())
       Serial.println("No ADXL345 sensor detected.");
 
-
   //Start NeoPixel module
-#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
-    clock_prescale_set(clock_div_1);
-#endif  
   pixels.begin(); // Initialize NeoPixel strip object
   pixels.setBrightness(20);
   pixels.clear();   
   pixels.show();
 
+  t0 = millis();
 }
 
 void loop() {
 
-  //Read bluetooth data from controller
-  if (SerialBT.available()) {
-    Serial.write(SerialBT.read());
-    if (SerialBT.read() == 'L') leftAnimation();
-    if (SerialBT.read() == 'R') rightAnimation();
-    //if (SerialBT.read() == 'B') breakAnimation();      
+  //Try to reconnect if controller is disconnected
+  if (SerialBT.connected()==0)
+  {
+    SerialBT.connect("Controller"); 
   }
+
+
+  //Read bluetooth data from controller
+  if (SerialBT.available() && c == ' ') {
+    c = SerialBT.read();
+    Serial.write(c);      
+  }
+  else  {
+    c == ' ';
+  }
+  
+  if (c == 'L') {
+    leftAnimation();
+    c = ' ';
+    SerialBT.flush();
+    positionLedOn();
+  }
+  if (c == 'R') {
+    rightAnimation();    
+    c = ' ';
+    SerialBT.flush();
+    positionLedOn();
+  }
+  if (c == 'B') {
+    brakeAnimation();
+    c = ' ';
+    SerialBT.flush();
+    positionLedOn();
+  }
+  
 
   //Smart headlight
   int lux = analogRead(lumen);
   if (lux>2900) output = 0;
   else output = (int)((3000-lux)*0.06);
   ledcWrite(ledChannel, output);
-  delay(100);
 
-  //Accelerometer 
-  sensors_event_t event; 
+  
+  //Accelerometer  
+  sensors_event_t event;
   accel.getEvent(&event);
   sum_acc = sqrt(pow(event.acceleration.x, 2) + pow(event.acceleration.y, 2) + pow(event.acceleration.z, 2));
-  delay(250);
-  if (sum_acc > accident_limit) Serial.print("Accident detected!");
+  if (sum_acc > accident_limit)
+  {
+    Serial.print("Accident detected!");
+    Serial.print(sum_acc/10);
+    Serial.println(" g strong shock");
+    fallAnimation();
+    positionLedOn();
+  }
 
 
   //GPS
-  while (ss.available() > 0)
-  {
-    if (gps.encode(ss.read()))
-      displayInfo();
+  if ((millis()-t0)%30000 <= 1000){
+    if (ss.available() > 0 && gps.encode(ss.read()))
+      displayInfo();   
   }  
-  if (millis() > 5000 && gps.charsProcessed() < 10)
-    Serial.println(F("No GPS detected: check wiring."));
-
 }
 
 
@@ -238,6 +265,8 @@ void rightAnimation(){
     setCircularArrayOffset(right, + i);
     delay(50);
   }
+  pixels.clear();   
+  pixels.show();
 }
 
 
@@ -246,4 +275,38 @@ void leftAnimation(){
     setCircularArrayOffset(left, -i);
     delay(50);
   }
+  pixels.clear();   
+  pixels.show();
+}
+
+void brakeAnimation(){
+  for(int i = 0; i < NUMPIXELS; i++){
+    pixels.setPixelColor(i, pixels.Color(maxR*0.75, 0, 0));
+  }
+
+  pixels.show();
+  delay(500);
+  pixels.clear();
+  pixels.show();
+}
+
+void fallAnimation(){
+  for (int j = 0; j < 5; j++){
+    for(int i = 0; i < NUMPIXELS; i++){
+      pixels.setPixelColor(i, pixels.Color(maxR*0.75, maxG*0.75, 0));
+    }
+  
+    pixels.show();
+    delay(500);
+    pixels.clear();
+    pixels.show();
+    delay(500);
+  }
+}
+
+void positionLedOn(){
+  for(int i = 0; i < WIDTH; i++){
+    pixels.setPixelColor(i, pixels.Color(maxR*0.5, 0, 0));
+  }
+  pixels.show();
 }

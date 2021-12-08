@@ -25,7 +25,7 @@ void loop() {
     SerialBT.write('L');
   }
 
-  if (input_y >= 4000){
+  if (input_y >= 3800){
     Serial.println("Right");
     SerialBT.write('R');
   }
