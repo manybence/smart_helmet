@@ -162,7 +162,7 @@ void loop() {
 
 void displayInfo()
 {
-  delay(5000);
+  delay(500);
   Serial.print(F("Location: ")); 
   if (gps.location.isValid())
   {
