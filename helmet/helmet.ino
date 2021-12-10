@@ -281,7 +281,7 @@ void leftAnimation(){
 
 void brakeAnimation(){
   for(int i = 0; i < NUMPIXELS; i++){
-    pixels.setPixelColor(i, pixels.Color(maxR*0.75, 0, 0));
+    pixels.setPixelColor(i, pixels.Color(maxR, 0, 0));
   }
 
   pixels.show();
@@ -293,7 +293,7 @@ void brakeAnimation(){
 void fallAnimation(){
   for (int j = 0; j < 5; j++){
     for(int i = 0; i < NUMPIXELS; i++){
-      pixels.setPixelColor(i, pixels.Color(maxR*0.75, maxG*0.75, 0));
+      pixels.setPixelColor(i, pixels.Color(maxR, maxG, 0));
     }
   
     pixels.show();
